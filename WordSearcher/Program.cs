@@ -1,8 +1,9 @@
-﻿namespace WordSearcher
+﻿
+namespace WordSearcher
 {
 
     /** *
-     * DLM: 05/01/2024 
+     * DLM: 05/02/2024 
      * Program Name: WordSearcher
      * Author: Joshua M. Wagoner
      * Copyright @ 2024
@@ -15,8 +16,23 @@
 
     /*
      * TODO:
-     * Rework all Search Methods, as the base formula has been changed.
-     * North is already done and working.
+     *  Finished: No
+     *  Finish writing the boundary method, clean up and simplify every day.
+     *  
+     *  Finished: No
+     *  Finishing writing the Find Row method. We are close!
+     * 
+     *  Finished: No
+     *  Write method checkers as in what happens if the character is on a boundry.
+     *  
+     *  Finished: No
+     *  Finish the algorithm.
+     *  
+     *  Finished: No
+     *  Test the algorithm.
+     *  
+     *  Finished: No
+     *  Finalize everything.
      */
 
     internal class Program
@@ -36,15 +52,26 @@
         }
 
         //Constants
+
+        //Debugging
         public readonly static string EOL_MESSAGE = "EOL";
+        public readonly static string NEW_LINE = "\n";
+        public readonly static string COLON = ":";
 
         public readonly static char ERROR = '!';
+        public readonly static char NOT_EXIST = ' ';
+        public readonly static char[] ERROR_CHAR_ARRAY = ['!'];
 
         public readonly static int NUM_DIRECTIONS = 8;
+        public readonly static int ROWS = 20;
+        public readonly static int COLUMNS = 22;
+        public readonly static int WORD_CHARACTER_LENGTH = 12;
+        public readonly static int WORD_CHARACTER_ROWS = 7;
+        public readonly static int ONE = 1;
 
         //Variables
-        public readonly static string[] words =
-            {
+        private readonly static string[] words =
+            [
             "blizzard    ", "december    ", "february    ", "fireplace   ",
             "flannel     ", "flurries    ", "frigid      ", "frostbite   ",
             "frozen      ", "gloves      ", "hockey      ", "holidays    ",
@@ -52,10 +79,10 @@
             "january     ", "longjohns   ", "mitts       ", "scarf       ",
             "shovel      ", "skating     ", "skiing      ", "sleigh      ",
             "slippery    ", "snowballs   ", "snowboarding", "snowflakes  ",
-            "snowman     ", "showshoes   ","solstice     ", "sweater     ",
+            "snowman     ", "showshoes   ", "solstice    ", "sweater     ",
             "toboggan    ", "whiteout    ", "wintertime  "
-        };
-        public readonly static string wordSearch =
+        ];
+        private readonly static string wordSearch =
             "koaxmgupnqdshovelcwfit" +
             "zbniretaewsojsyadilohk" +
             "ajtqhvimogtlbrnpxugefc" +
@@ -77,108 +104,210 @@
             "biclrmhgqpsekalfwonsdu" +
             "yfsnvtekcajhdqziplxmbr";
 
-        public readonly static char[] chars = wordSearch.ToCharArray();
+        private readonly static char[] chars = wordSearch.ToCharArray();
 
-        public readonly static int cRows = 7;
-        public readonly static int cColumns = 12;
+        private readonly static int cRows = WORD_CHARACTER_ROWS;
+        private readonly static int cColumns = WORD_CHARACTER_LENGTH;
         public readonly static char[,] wordChars = new char[cRows, cColumns];
 
-        public readonly static int rows = 20;
-        public readonly static int columns = 22;
+        private readonly static int rows = ROWS;
+        private readonly static int columns = COLUMNS;
+        private readonly static int characters = rows * columns;
 
-        //Finders
+        //Debugging Methods
+        public static void Print(string s)
+        => Console.Write(s);
 
+        //Finder
         /// <summary>
         /// Finds the index of a character by using the row and column.
         /// </summary>
         /// <param name="row">The row of the character. (Integer)</param>
         /// <param name="column">The column of the character. (Integer)</param>
         /// <returns>Index</returns>
-        public static int FindIndex(int row, int column)
-        => (row * columns) - (columns- column);
+        private static int FindIndex(int row, int column)
+        => (row * columns) - (columns - column);
+
+        //Might need to use class structure for this one.
+        private static void FindRow(int index)
+        {
+            //Ratios
+            int row = index / columns;
+            int column = index / rows;
+
+            //Temporary
+            if(row >= 0 && row <= ONE)
+                Print(row + string.Empty);
+        }
 
         //Direction Searches
-
         /// <summary>
         /// Searches for a character in the North direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the north direction.</returns>
-        public static char SearchNorth(int index)
+        private static char SearchNorth(int index)
         => chars[index - columns];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search North.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char North(int index)
+        => CharacterExists(index - columns)
+            ? SearchNorth(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the East direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the East direction.</returns>
-        public static char SearchEast(int index)
-        => chars[index++];
+        private static char SearchEast(int index)
+        => chars[index + ONE];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search East.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char East(int index)
+        => CharacterExists(index + ONE)
+            ? SearchEast(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the South direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the South direction.</returns>
-        public static char SearchSouth(int index)
-        => chars[index - columns];
+        private static char SearchSouth(int index)
+        => chars[index + columns];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search North.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char South(int index)
+        => CharacterExists(index + columns)
+            ? SearchSouth(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the West direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the West direction.</returns>
-        public static char SearchWest(int index)
-        => chars[index--];
+        private static char SearchWest(int index)
+        => chars[index - ONE];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search North.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        public static char West(int index)
+        => CharacterExists(index - ONE) 
+            ? SearchWest(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the North East direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the North East direction.</returns>
-        public static char SearchNorthEast(int index)
-        => SearchNorth(SearchEast(index));
+        private static char SearchNorthEast(int index)
+        => chars[(index + ONE) - columns];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search North East.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char NorthEast(int index)
+        => CharacterExists((index + ONE) - columns)
+            ? SearchNorthEast(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the South East direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the South East direction.</returns>
-        public static char SearchSouthEast(int index)
-        => SearchSouth(SearchEast(index));
+        private static char SearchSouthEast(int index)
+        => chars[(index + ONE) + columns];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search South East.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char SouthEast(int index)
+        => CharacterExists(index + ONE) 
+            ? SearchSouthEast(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the South West direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the South West direction.</returns>
-        public static char SearchSouthWest(int index)
-        => SearchSouth(SearchWest(index));
+        private static char SearchSouthWest(int index)
+        => chars[(index - ONE) + columns];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search North.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char SouthWest(int index)
+        => CharacterExists((index - ONE) + columns)
+            ? SearchSouthWest(index) : NOT_EXIST;
 
         /// <summary>
         /// Searches for a character in the North West direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the North West direction.</returns>
-        public static char SearchNorthWest(int index)
-        => SearchNorth(SearchWest(index));
+        private static char SearchNorthWest(int index)
+        => chars[(index - ONE) - columns];
+
+        /// <summary>
+        /// Checks to see if the method exists before continuing to Search North.
+        /// If it doesn't it will return the ERROR character '!';
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Character at Index</returns>
+        private static char NorthWest(int index)
+        => CharacterExists((index - ONE) - columns) 
+            ? SearchNorthWest(index) : NOT_EXIST;
 
         //Helpers
-
         /// <summary>
         /// Takes a index input, and converts it to ZeroBased.
         /// </summary>
         /// <param name="index">The Index</param>
         /// <returns>The Zero Based Index</returns>
-        public static int ConvertToZeroBased(int index)
-        => index-1;
+        private static int ConvertToZeroBased(int index)
+        => index - ONE;
+
+        /// <summary>
+        /// Reverse the process of the Zero Based Conversion
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Reversed Zero Based Index</returns>
+        private static int ReverseZeroBased(int index)
+        => index + ONE;
 
         /// <summary>
         /// Returns the Direction that relates to the integer assigned to it.
         /// </summary>
         /// <param name="integer">The integer</param>
         /// <returns>The correlating Direction.</returns>
-        public static Directions GetDirectionByInteger(int integer)
+        private static Directions GetDirectionByInteger(int integer)
         {
             Directions tempDirection = Directions.NORTH;
 
@@ -200,10 +329,10 @@
                     tempDirection = Directions.SOUTH;
                     break;
                 case 6:
-                    tempDirection = Directions.NORTH;
+                    tempDirection = Directions.SOUTH_WEST;
                     break;
                 case 7:
-                    tempDirection = Directions.NORTH_WEST;
+                    tempDirection = Directions.WEST;
                     break;
                 case 8:
                     tempDirection = Directions.NORTH_WEST;
@@ -218,35 +347,35 @@
         /// <param name="direction">The Direction for the Search.</param>
         /// <param name="index">The Index of the Character.</param>
         /// <returns>The character in the specified direction.</returns>
-        public static char Search(Directions direction, int index)
+        private static char Search(Directions direction, int index)
         {
             char tempChar = ERROR;
 
             switch (direction)
             {
                 case Directions.NORTH:
-                    tempChar = SearchNorth(index);
+                    tempChar = North(index);
                     break;
                 case Directions.NORTH_EAST:
-                    tempChar = SearchNorthEast(index);
+                    tempChar = NorthEast(index);
                     break;
                 case Directions.EAST:
-                    tempChar = SearchEast(index);
+                    tempChar = East(index);
                     break;
                 case Directions.SOUTH_EAST:
-                    tempChar = SearchNorth(index);
+                    tempChar = SouthEast(index);
                     break;
                 case Directions.SOUTH:
-                    tempChar = SearchNorth(index);
+                    tempChar = South(index);
                     break;
                 case Directions.SOUTH_WEST:
-                    tempChar = SearchNorth(index);
+                    tempChar = SouthWest(index);
                     break;
                 case Directions.WEST:
-                    tempChar = SearchNorth(index);
+                    tempChar = West(index);
                     break;
                 case Directions.NORTH_WEST:
-                    tempChar = SearchNorth(index);
+                    tempChar = NorthWest(index);
                     break;
                 default:
                     //Not a direction
@@ -260,19 +389,55 @@
         /// Searches all eight directions.
         /// </summary>
         /// <returns>A Character array of all the searches.</returns>
-        public static char[] SearchDirections(int index)
+        private static char[] SearchDirections(int index)
         {
             char[] chars = new char[NUM_DIRECTIONS];
 
             //Search Directions
-            for (int x = 1; x < NUM_DIRECTIONS; x++)
+            for (int x = 0; x < NUM_DIRECTIONS; x++)
             {
-
-                chars[x] = Search(GetDirectionByInteger(x), index);
+                chars[x] = Search(GetDirectionByInteger(ReverseZeroBased(x)), index);
+                Print(GetDirectionByInteger(ReverseZeroBased(x)) + COLON);
+                Print(chars[x] + string.Empty + NEW_LINE);
             }
 
             return chars;
         }
+
+        /// <summary>
+        /// A more robust directional search that checks to see if the current index exists,
+        /// and automatically converts the index into a ZeroBasedIndex.
+        /// Returns an ERROR CHAR ARRAY '[ '!' ]' if the index doesn't exist.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>A character array.</returns>
+        public static char[] DirectionalSearch(int index)
+        => CharacterExists(ConvertToZeroBased(index))
+            ? SearchDirections(ConvertToZeroBased(index)) : ERROR_CHAR_ARRAY;
+
+        /// <summary>
+        /// A more robust directional search that checks to see if the current index at 
+        /// the row and column exists, and automatically converts the index into a ZeroBasedIndex.
+        /// Returns an ERROR CHAR ARRAY '[ '!' ]' if the index doesn't exist.
+        /// </summary>
+        /// <param name="row">The row of the character</param>
+        /// <param name="column">The column of the character</param>
+        /// <returns>A character array.</returns>
+        public static char[] DirectionalSearch(int row, int column)
+        => CharacterExists(ConvertToZeroBased(FindIndex(row, column))) 
+            ? SearchDirections(ConvertToZeroBased(FindIndex(row, column))) : ERROR_CHAR_ARRAY;
+
+        //Method Checkers
+        /// <summary>
+        /// This method checks the index to see if its valid or not.
+        /// </summary>
+        /// <param name="index">The Index of the possible character.</param>
+        /// <returns>A Boolean</returns>
+        public static bool CharacterExists(int index)
+        => index >= 0 && index <= characters;
+
+        //public static bool CheckWallBoundry(int index)
+        //=> index >= ((row - ONE) * columns) && index <= (columns * row);
 
         //Algorithm
 
@@ -302,18 +467,18 @@
         private static void Main(string[] args)
         {
             //Testing
-            Console.Write(FindIndex(10, 3));
-            Console.Write("=");
-            Console.Write(chars[ConvertToZeroBased(FindIndex(10,3))]);
-            Console.WriteLine();
-            Console.Write("N=");
-            Console.Write(SearchNorth(ConvertToZeroBased(FindIndex(10, 3))));
+
+                FindRow(FindIndex(19, 22));
+                Print(NEW_LINE);
             
+
+
 
             //Acknowledge EOP
             Console.WriteLine();
             Console.WriteLine("End Of Program?");
             Console.ReadKey(true);
         }
+
     }
 }
