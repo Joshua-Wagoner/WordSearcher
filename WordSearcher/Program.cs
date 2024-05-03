@@ -3,10 +3,10 @@ namespace WordSearcher
 {
 
     /** *
-     * DLM: 05/02/2024 
+     * DLM: 05/03/2024 
      * Program Name: WordSearcher
      * Author: Joshua M. Wagoner
-     * Copyright @ 2024
+     * Copyright @ 2024 All Rights Reserved
      * 
      * Description:
      * This program will take a designated word search, a list of words,
@@ -17,13 +17,17 @@ namespace WordSearcher
     /*
      * TODO:
      *  Finished: No
-     *  Finish writing the boundary method, clean up and simplify every day.
+     *  Clean and Simplify
      *  
      *  Finished: No
-     *  Finishing writing the Find Row method. We are close!
+     *  Finish writing the boundary method.
+     *  
+     *  Finished: No
+     *  Finishing writing the Find Row method & Find Column method.
+     *  Also finish all the helpers.
      * 
      *  Finished: No
-     *  Write method checkers as in what happens if the character is on a boundry.
+     *  Write method checkers.
      *  
      *  Finished: No
      *  Finish the algorithm.
@@ -68,6 +72,9 @@ namespace WordSearcher
         public readonly static int WORD_CHARACTER_LENGTH = 12;
         public readonly static int WORD_CHARACTER_ROWS = 7;
         public readonly static int ONE = 1;
+
+        public readonly static double C_RATIO = 0.045454545454545;
+        public readonly static double R_RATIO = 0.05;
 
         //Variables
         private readonly static string[] words =
@@ -118,6 +125,66 @@ namespace WordSearcher
         public static void Print(string s)
         => Console.Write(s);
 
+        //Find Helpers
+
+        /// <summary>
+        /// This method is a helper method for the Finder methods
+        /// It takes the index and multiplies it by the column ratio.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>The Column Ratio</returns>
+        private static double ColumnRatio(double index)
+        => index * C_RATIO;
+
+        /// <summary>
+        /// Does the same thing as ColumnRatio, but used the Math Operation Floor.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Floored Column Ratio</returns>
+        private static double FlooredColumnRatio(double index)
+        => Math.Floor(ColumnRatio(index));
+
+        /// <summary>
+        /// This method is a helper method for the Finder methods.
+        /// It takes the index and multiplies it by the column ratio.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>The Row Ratio</returns>
+        private static double RowRatio(double index)
+        => index * R_RATIO;
+
+        /// <summary>
+        /// Does the same thing as RowRatio, but used the Math Operation Floor.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>Floored Row Ratio</returns>
+        private static double FlooredRowRatio(double index)
+        => Math.Floor(RowRatio(index));
+
+        /// <summary>
+        /// This method is a helper method for the Finder methods.
+        /// It takes the index and divides it by the rows to get the row min.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>The Row Min</returns>
+        private static double RowMin(double index)
+        => index / rows;
+
+        private static double RowMax(double index)
+        => RowMin(index) + ONE;
+        
+        /// <summary>
+        /// This method is a helper method for the Finder methods.
+        /// It takes the index and divides it by the columns to get the column min.
+        /// </summary>
+        /// <param name="index">The Index</param>
+        /// <returns>The Column Min</returns>
+        private static double ColumnMin(double index)
+        => index / columns;
+
+        private static double ColumnMax(double index)
+        => ColumnMin(index) + ONE;
+
         //Finder
         /// <summary>
         /// Finds the index of a character by using the row and column.
@@ -128,17 +195,14 @@ namespace WordSearcher
         private static int FindIndex(int row, int column)
         => (row * columns) - (columns - column);
 
-        //Might need to use class structure for this one.
-        private static void FindRow(int index)
-        {
-            //Ratios
-            int row = index / columns;
-            int column = index / rows;
 
-            //Temporary
-            if(row >= 0 && row <= ONE)
-                Print(row + string.Empty);
-        }
+        //Rework with Helper Methods.
+        private static int FindRow(int index)
+        => (int)Math.Round(
+            ((((index / columns) + ONE) / ONE)
+            - (index * C_RATIO))
+            + Math.Floor((index * C_RATIO))
+        );
 
         //Direction Searches
         /// <summary>
@@ -436,8 +500,38 @@ namespace WordSearcher
         public static bool CharacterExists(int index)
         => index >= 0 && index <= characters;
 
-        //public static bool CheckWallBoundry(int index)
-        //=> index >= ((row - ONE) * columns) && index <= (columns * row);
+        /// <summary>
+        /// This is the core of the program. It is the lifeblood.
+        /// This can find the row and column of any index through a complex process.
+        /// </summary>
+        /// <param name="index">The index</param>
+        private static void Core(double index)
+        {   
+            /*
+             * Author: Joshua Wagoner
+             * Copyright @ 2024 All Rights Reserved
+             * DLM: 05/03/2024
+             */
+            //START
+            double minC = index / columns;
+            double minPercentC = (index * C_RATIO);
+            double minPercentCFloored = Math.Floor(minPercentC);
+            double maxC = (minC + ONE);
+            double rowC = Math.Round(((((maxC / ONE) - minPercentC)) 
+                + minPercentCFloored));
+            double minR = index / rows;
+            double minPercentR = (index * R_RATIO);
+            double maxR = (minR  + ONE);
+            double rowR = ((maxR / ONE) - minPercentR);
+            double colR = Math.Round((index - ((rowR - ONE) * columns)) 
+                - (minPercentCFloored * columns));
+
+            Print("Index: " + index + NEW_LINE);
+            Print("Row = " + rowC + NEW_LINE + "Col = " + colR);
+
+            Print(NEW_LINE + NEW_LINE);
+            //END
+;        }
 
         //Algorithm
 
@@ -467,9 +561,11 @@ namespace WordSearcher
         private static void Main(string[] args)
         {
             //Testing
-
-                FindRow(FindIndex(19, 22));
-                Print(NEW_LINE);
+            Core(116); //6, 6
+            Core(94);  //5, 6
+            Print(FindRow(116) + NEW_LINE);
+            Print(FindColumn(116) + NEW_LINE);
+            Print(NEW_LINE);
             
 
 
