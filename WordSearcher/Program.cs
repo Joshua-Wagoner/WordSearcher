@@ -1,9 +1,10 @@
-﻿
+﻿using Microsoft.VisualBasic;
+
 namespace WordSearcher
 {
 
     /** *
-     * DLM: 05/03/2024 
+     * DLM: 05/06/2024 
      * Program Name: WordSearcher
      * Author: Joshua M. Wagoner
      * Copyright @ 2024 All Rights Reserved
@@ -16,18 +17,28 @@ namespace WordSearcher
 
     /*
      * TODO:
-     *  Finished: No
+     *  Finished: Yes
      *  Clean and Simplify
      *  
-     *  Finished: No
+     *  Finsihed: Yes
+     *  Simplfy the Directional Criterias
+     *  
+     *  Finished: Yes
      *  Finish writing the boundary method.
      *  
-     *  Finished: No
+     *  Finished: Yes
      *  Finishing writing the Find Row method & Find Column method.
      *  Also finish all the helpers.
      * 
-     *  Finished: No
+     *  Finished: Yes
      *  Write method checkers.
+     *  
+     *  Finished: Yes
+     *  Finish implementing the new method checkers into the directional searches.
+     *  
+     *  Finished: No
+     *  Finish implementing the final searching methods, and the public directional search
+     *  that will use the new Protected Search Method.
      *  
      *  Finished: No
      *  Finish the algorithm.
@@ -52,7 +63,8 @@ namespace WordSearcher
             SOUTH = 5,
             SOUTH_WEST = 6,
             WEST = 7,
-            NORTH_WEST = 8
+            NORTH_WEST = 8,
+            NONE = 9
         }
 
         //Constants
@@ -66,12 +78,82 @@ namespace WordSearcher
         public readonly static char NOT_EXIST = ' ';
         public readonly static char[] ERROR_CHAR_ARRAY = ['!'];
 
+        public readonly static Directions[] DIRECTIONS =
+        [
+            Directions.NORTH,
+            Directions.NORTH_EAST,
+            Directions.EAST,
+            Directions.SOUTH_EAST,
+            Directions.SOUTH,
+            Directions.SOUTH_WEST,
+            Directions.WEST,
+            Directions.NORTH_WEST
+        ];
+
+        public readonly static Directions[] CORNERS =
+        [
+            DIRECTIONS[7],
+            DIRECTIONS[1],
+            DIRECTIONS[5],
+            DIRECTIONS[3]
+        ];
+
+        public readonly static Directions[] DIRECTIONALS =
+        [
+            DIRECTIONS[0],
+            DIRECTIONS[2],
+            DIRECTIONS[4],
+            DIRECTIONS[6]
+        ];
+
         public readonly static int NUM_DIRECTIONS = 8;
         public readonly static int ROWS = 20;
         public readonly static int COLUMNS = 22;
         public readonly static int WORD_CHARACTER_LENGTH = 12;
         public readonly static int WORD_CHARACTER_ROWS = 7;
         public readonly static int ONE = 1;
+
+
+        //Directional Criteria
+        private static readonly int directionalRows = NUM_DIRECTIONS / 2;
+
+        private static readonly int cornerCols = 3;
+
+        public readonly static Directions[,] CORNERS_CRITERIA =
+        { 
+            //Northwest Criteria
+            {Directions.EAST, Directions.SOUTH_EAST, Directions.SOUTH},
+
+            //Northeast Criteria
+            {Directions.SOUTH, Directions.SOUTH_WEST, Directions.WEST},
+
+            //Southwest Criteria
+            {Directions.NORTH, Directions.NORTH_EAST, Directions.EAST},
+
+            //Southeast Criteria
+            {Directions.NORTH, Directions.WEST, Directions.NORTH_WEST}
+        };
+
+        private static readonly int directionCols = 5;
+
+        public readonly static Directions[,] DIRECTIONS_CRITERIA =
+        {
+            //North Criteria
+            {Directions.EAST, Directions.SOUTH_EAST, Directions.SOUTH, 
+                Directions.SOUTH_WEST, Directions.WEST},
+
+            //East Criteria
+            {Directions.NORTH, Directions.SOUTH, Directions.SOUTH_WEST, 
+                Directions.WEST, Directions.NORTH_WEST},
+
+            //South Criteria
+            {Directions.NORTH, Directions.NORTH_EAST, Directions.EAST,
+                Directions.WEST, Directions.NORTH_WEST},
+
+            //West Criteria
+            {Directions.NORTH, Directions.NORTH_EAST, Directions.EAST,
+                Directions.SOUTH_EAST, Directions.SOUTH},
+        };
 
         public readonly static double C_RATIO = 0.045454545454545;
         public readonly static double R_RATIO = 0.05;
@@ -154,14 +236,6 @@ namespace WordSearcher
         => index * R_RATIO;
 
         /// <summary>
-        /// Does the same thing as RowRatio, but used the Math Operation Floor.
-        /// </summary>
-        /// <param name="index">The Index</param>
-        /// <returns>Floored Row Ratio</returns>
-        private static double FlooredRowRatio(double index)
-        => Math.Floor(RowRatio(index));
-
-        /// <summary>
         /// This method is a helper method for the Finder methods.
         /// It takes the index and divides it by the rows to get the row min.
         /// </summary>
@@ -195,14 +269,46 @@ namespace WordSearcher
         private static int FindIndex(int row, int column)
         => (row * columns) - (columns - column);
 
+        /// <summary>
+        /// Finds the row just by using the index.
+        /// It uses a complex assortments of operations. (Refer to Help Sheet)
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>The row</returns>
+        private static int FindRow(double index)
+        => (int)Math.Round
+            (
+                (
+                    (ColumnMax(index) / ONE) 
+                    - ColumnRatio(index)
+                ) 
+                + FlooredColumnRatio(index)
+            );
 
-        //Rework with Helper Methods.
-        private static int FindRow(int index)
-        => (int)Math.Round(
-            ((((index / columns) + ONE) / ONE)
-            - (index * C_RATIO))
-            + Math.Floor((index * C_RATIO))
-        );
+        /// <summary>
+        /// Find the column just by using the index.
+        /// It uses a complex assortments of operations. (Refer to Help Sheet)
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>The column</returns>
+        private static int FindColumn(double index)
+        => (int)Math.Round
+            (
+                (
+                    index -
+                    (
+                        (
+                            (
+                                (RowMax(index) / ONE)
+                                - RowRatio(index)
+                            ) 
+                            - ONE
+                        ) 
+                        * columns
+                    )
+                ) 
+                - (FlooredColumnRatio(index) * columns)
+            );
 
         //Direction Searches
         /// <summary>
@@ -367,6 +473,96 @@ namespace WordSearcher
         => index + ONE;
 
         /// <summary>
+        /// Takes in a direction and checks whether or not it can be done
+        /// with the certain directional criteria.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        private static bool IsDirectionValid(Directions direction, Directions criteria)
+        {
+            bool valid = false;
+            //Temporary debugging
+            Print(criteria + COLON + direction);
+
+            for (int i = 0; i < directionalRows; i++)
+            {
+                if (criteria == CORNERS[i])
+                {
+                    for (int j = 0; j < cornerCols; j++)
+                        if (direction == CORNERS_CRITERIA[i, j])
+                        { valid = true; j = cornerCols; }
+                }
+                else if (criteria == DIRECTIONALS[i])
+                {
+                    for (int j = 0; j < directionCols; j++)
+                        if (direction == DIRECTIONS_CRITERIA[i, j])
+                        { valid = true; j = directionCols; }
+                }
+            }
+            return valid;
+        }
+
+        /// <summary>
+        /// This method uses the index and returns a criteria if there is one.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>The Criteria, if any</returns>
+        private static Directions GetCriteria(int index)
+        {
+            Directions criteria = Directions.NONE;
+
+            if (IsWallCheck(index))
+            {
+                if (IsWestWall(index))
+                {
+                    if (IsNorthWestCorner(index))
+                    {
+                        criteria = Directions.NORTH_WEST;
+                    }
+                    else if (IsSouthWestCorner(index))
+                    {
+                        criteria = Directions.SOUTH_WEST;
+                    }
+                    else
+                    {
+                        criteria = Directions.WEST;
+                    }
+                }
+                else if (IsEastWall(index))
+                {
+                    if (IsNorthEastCorner(index))
+                    {
+                        criteria = Directions.NORTH_EAST;
+                    }
+                    else if (IsSouthEastCorner(index))
+                    {
+                        criteria = Directions.SOUTH_EAST;
+                    }
+                    else
+                    {
+                        criteria = Directions.EAST;
+                    }
+                }
+
+
+            }
+            else if (IsPoleCheck(index))
+            {
+                if (IsNorthPole(index))
+                {
+                    criteria = Directions.NORTH;
+                }
+                else if (IsSouthPole(index))
+                {
+                    criteria = Directions.SOUTH;
+                }
+            }
+
+            return criteria;
+        }
+
+        /// <summary>
         /// Returns the Direction that relates to the integer assigned to it.
         /// </summary>
         /// <param name="integer">The integer</param>
@@ -450,6 +646,29 @@ namespace WordSearcher
         }
 
         /// <summary>
+        /// Protects the Search method by first validating the search.
+        /// </summary>
+        /// <param name="direction">The Direction</param>
+        /// <param name="index">The Index</param>
+        /// <returns>The Character</returns>
+        private static char ProtectedSearch(Directions direction, int index)
+        {
+            if (GetCriteria(index) == Directions.NONE)
+                return Search(direction, ConvertToZeroBased(index));
+            else if (GetCriteria(index) != Directions.NONE)
+            {
+                if (IsDirectionValid(direction, GetCriteria(index)))
+                {
+                    return Search(direction, ConvertToZeroBased(index));
+                }
+                else
+                    return NOT_EXIST;
+            }
+            else
+                return ERROR;
+                
+        }
+        /// <summary>
         /// Searches all eight directions.
         /// </summary>
         /// <returns>A Character array of all the searches.</returns>
@@ -461,8 +680,6 @@ namespace WordSearcher
             for (int x = 0; x < NUM_DIRECTIONS; x++)
             {
                 chars[x] = Search(GetDirectionByInteger(ReverseZeroBased(x)), index);
-                Print(GetDirectionByInteger(ReverseZeroBased(x)) + COLON);
-                Print(chars[x] + string.Empty + NEW_LINE);
             }
 
             return chars;
@@ -479,18 +696,6 @@ namespace WordSearcher
         => CharacterExists(ConvertToZeroBased(index))
             ? SearchDirections(ConvertToZeroBased(index)) : ERROR_CHAR_ARRAY;
 
-        /// <summary>
-        /// A more robust directional search that checks to see if the current index at 
-        /// the row and column exists, and automatically converts the index into a ZeroBasedIndex.
-        /// Returns an ERROR CHAR ARRAY '[ '!' ]' if the index doesn't exist.
-        /// </summary>
-        /// <param name="row">The row of the character</param>
-        /// <param name="column">The column of the character</param>
-        /// <returns>A character array.</returns>
-        public static char[] DirectionalSearch(int row, int column)
-        => CharacterExists(ConvertToZeroBased(FindIndex(row, column))) 
-            ? SearchDirections(ConvertToZeroBased(FindIndex(row, column))) : ERROR_CHAR_ARRAY;
-
         //Method Checkers
         /// <summary>
         /// This method checks the index to see if its valid or not.
@@ -500,38 +705,88 @@ namespace WordSearcher
         public static bool CharacterExists(int index)
         => index >= 0 && index <= characters;
 
+        //Direction and Placement Checkers
+
         /// <summary>
-        /// This is the core of the program. It is the lifeblood.
-        /// This can find the row and column of any index through a complex process.
+        /// Checks the index to see if its at the West Wall.
         /// </summary>
         /// <param name="index">The index</param>
-        private static void Core(double index)
-        {   
-            /*
-             * Author: Joshua Wagoner
-             * Copyright @ 2024 All Rights Reserved
-             * DLM: 05/03/2024
-             */
-            //START
-            double minC = index / columns;
-            double minPercentC = (index * C_RATIO);
-            double minPercentCFloored = Math.Floor(minPercentC);
-            double maxC = (minC + ONE);
-            double rowC = Math.Round(((((maxC / ONE) - minPercentC)) 
-                + minPercentCFloored));
-            double minR = index / rows;
-            double minPercentR = (index * R_RATIO);
-            double maxR = (minR  + ONE);
-            double rowR = ((maxR / ONE) - minPercentR);
-            double colR = Math.Round((index - ((rowR - ONE) * columns)) 
-                - (minPercentCFloored * columns));
+        /// <returns>A Bool</returns>
+        public static bool IsWestWall(int index)
+        => FindColumn(index) == ONE;
 
-            Print("Index: " + index + NEW_LINE);
-            Print("Row = " + rowC + NEW_LINE + "Col = " + colR);
+        /// <summary>
+        /// Checks the index to see if its at the East Wall.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool</returns>
+        public static bool IsEastWall(int index)
+        => FindColumn(index) == columns;
 
-            Print(NEW_LINE + NEW_LINE);
-            //END
-;        }
+        /// <summary>
+        /// This method checks to see if the index is at the left or right.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsWallCheck(int index)
+        => IsWestWall(index) || IsEastWall(index);
+
+        /// <summary>
+        /// This method checks to see if the index is at the top
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsNorthPole(int index)
+        => FindRow(index) == ONE;
+
+        /// <summary>
+        /// This method checks to see if the index is at the bottom.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsSouthPole(int index)
+        => FindRow(index) == rows;
+
+        /// <summary>
+        /// This method checks to see if the index is at the top or bottom.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsPoleCheck(int index)
+        => IsNorthPole(index) || IsSouthPole(index);
+
+        /// <summary>
+        /// This methods checks to see if the index is the North West Corner
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsNorthWestCorner(int index)
+        => IsNorthPole(index) && IsWestWall(index);
+
+        /// <summary>
+        /// This methods checks to see if the index is the North East Corner
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsNorthEastCorner(int index)
+        => IsNorthPole(index) && IsEastWall(index);
+
+        /// <summary>
+        /// This methods checks to see if the index is the South West Corner
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsSouthWestCorner(int index)
+        => IsSouthPole(index) && IsWestWall(index);
+
+        /// <summary>
+        /// This methods checks to see if the index is the South East Corner
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value</returns>
+        public static bool IsSouthEastCorner(int index)
+        => IsSouthPole(index) && IsEastWall(index);
+
 
         //Algorithm
 
@@ -561,16 +816,8 @@ namespace WordSearcher
         private static void Main(string[] args)
         {
             //Testing
-            Core(116); //6, 6
-            Core(94);  //5, 6
-            Print(FindRow(116) + NEW_LINE);
-            Print(FindColumn(116) + NEW_LINE);
-            Print(NEW_LINE);
+
             
-
-
-
-            //Acknowledge EOP
             Console.WriteLine();
             Console.WriteLine("End Of Program?");
             Console.ReadKey(true);
