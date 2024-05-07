@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic;
-
-namespace WordSearcher
+﻿namespace WordSearcher
 {
 
     /** *
@@ -36,7 +34,7 @@ namespace WordSearcher
      *  Finished: Yes
      *  Finish implementing the new method checkers into the directional searches.
      *  
-     *  Finished: No
+     *  Finished: Yes
      *  Finish implementing the final searching methods, and the public directional search
      *  that will use the new Protected Search Method.
      *  
@@ -111,6 +109,11 @@ namespace WordSearcher
         public readonly static int COLUMNS = 22;
         public readonly static int WORD_CHARACTER_LENGTH = 12;
         public readonly static int WORD_CHARACTER_ROWS = 7;
+        public readonly static int WORDS_A_ROW = 5;
+        public readonly static int OVERALL_ROW_LENGTH = 
+            WORDS_A_ROW * WORD_CHARACTER_LENGTH;
+
+        public readonly static int ZERO = 0;
         public readonly static int ONE = 1;
 
 
@@ -194,18 +197,31 @@ namespace WordSearcher
             "yfsnvtekcajhdqziplxmbr";
 
         private readonly static char[] chars = wordSearch.ToCharArray();
-
-        private readonly static int cRows = WORD_CHARACTER_ROWS;
-        private readonly static int cColumns = WORD_CHARACTER_LENGTH;
-        public readonly static char[,] wordChars = new char[cRows, cColumns];
-
+        private readonly static int characters = ROWS * COLUMNS;
         private readonly static int rows = ROWS;
         private readonly static int columns = COLUMNS;
-        private readonly static int characters = rows * columns;
 
         //Debugging Methods
         public static void Print(string s)
         => Console.Write(s);
+
+        public static void PrintArray(char[] array)
+        {
+            foreach (int i in array)
+                if (i != array[^ONE])
+                    Print(i + COLON);
+                else
+                    Print(i + NEW_LINE);
+        }
+
+        public static void PrintArray(int[] array)
+        {
+            foreach (int i in array)
+                if (i != array[^ONE])
+                    Print(i + COLON);
+                else
+                    Print(i + NEW_LINE);
+        }
 
         //Find Helpers
 
@@ -482,20 +498,18 @@ namespace WordSearcher
         private static bool IsDirectionValid(Directions direction, Directions criteria)
         {
             bool valid = false;
-            //Temporary debugging
-            Print(criteria + COLON + direction);
 
-            for (int i = 0; i < directionalRows; i++)
+            for (int i = ZERO; i < directionalRows; i++)
             {
                 if (criteria == CORNERS[i])
                 {
-                    for (int j = 0; j < cornerCols; j++)
+                    for (int j = ZERO; j < cornerCols; j++)
                         if (direction == CORNERS_CRITERIA[i, j])
                         { valid = true; j = cornerCols; }
                 }
                 else if (criteria == DIRECTIONALS[i])
                 {
-                    for (int j = 0; j < directionCols; j++)
+                    for (int j = ZERO; j < directionCols; j++)
                         if (direction == DIRECTIONS_CRITERIA[i, j])
                         { valid = true; j = directionCols; }
                 }
@@ -677,9 +691,9 @@ namespace WordSearcher
             char[] chars = new char[NUM_DIRECTIONS];
 
             //Search Directions
-            for (int x = 0; x < NUM_DIRECTIONS; x++)
+            for (int x = ZERO; x < NUM_DIRECTIONS; x++)
             {
-                chars[x] = Search(GetDirectionByInteger(ReverseZeroBased(x)), index);
+                chars[x] = ProtectedSearch(GetDirectionByInteger(ReverseZeroBased(x)), index);
             }
 
             return chars;
@@ -693,8 +707,8 @@ namespace WordSearcher
         /// <param name="index">The Index</param>
         /// <returns>A character array.</returns>
         public static char[] DirectionalSearch(int index)
-        => CharacterExists(ConvertToZeroBased(index))
-            ? SearchDirections(ConvertToZeroBased(index)) : ERROR_CHAR_ARRAY;
+        => CharacterExists(index)
+            ? SearchDirections(index) : ERROR_CHAR_ARRAY;
 
         //Method Checkers
         /// <summary>
@@ -703,7 +717,7 @@ namespace WordSearcher
         /// <param name="index">The Index of the possible character.</param>
         /// <returns>A Boolean</returns>
         public static bool CharacterExists(int index)
-        => index >= 0 && index <= characters;
+        => index >= ZERO && index <= characters;
 
         //Direction and Placement Checkers
 
@@ -790,6 +804,144 @@ namespace WordSearcher
 
         //Algorithm
 
+        /// <summary>
+        /// This method takes in a character and returns the first index
+        /// of its kind.
+        /// </summary>
+        /// <param name="c">The character.</param>
+        /// <returns>The index.</returns>
+        public static int FindFirstCharacter(char c)
+        {
+            int index = ZERO;
+
+            for(int i = ZERO; i < wordSearch.Length; i++)
+            {
+                if (wordSearch[i] == c)
+                {
+                    index = ReverseZeroBased(i);
+                    i = wordSearch.Length;
+                }
+            }
+
+            return index;
+        }
+
+        /// <summary>
+        /// This method takes in a character, and a starting index to start
+        /// the search at.
+        /// </summary>
+        /// <param name="c">The character.</param>
+        /// <param name="startingIndex">The starting index.</param>
+        /// <returns>The index</returns>
+        public static int FindNextCharacter(char c, int startingIndex)
+        {
+            int index = ZERO;
+
+            for (int i = startingIndex; i < wordSearch.Length; i++)
+            {
+                if (wordSearch[i] == c)
+                {
+                    index = ReverseZeroBased(i);
+                    i = wordSearch.Length;
+                }
+            }
+
+            return index;
+        }
+
+        /// <summary>
+        /// The method checks the boundry of the index used in the
+        /// character finder methods.
+        /// </summary>
+        /// <param name="index">The index</param>
+        /// <returns>A Bool Value.</returns>
+        public static bool IsBoundry(int index)
+        => index > ZERO && index < wordSearch.Length;
+
+        //Hurray for Recursion!
+
+        /// <summary>
+        /// This method combines the first two Find Character Methods.
+        /// It uses recursion to find all instances of a letter, if any.
+        /// </summary>
+        /// <param name="c">The character</param>
+        /// <returns>All Instances' indexes</returns>
+        public static int[] FindAllInstancesOfCharacter(char c)
+        {
+            int[] instances = new int[wordSearch.Length];
+            int length = ZERO;
+            bool condition;
+            int startingIndex;
+            int nextIndex;
+
+            startingIndex = FindFirstCharacter(c);
+
+            if (IsBoundry(startingIndex))
+            {
+                instances[length] = startingIndex;
+                length += ONE;
+
+                nextIndex = FindNextCharacter(c, startingIndex);
+                condition = IsBoundry(nextIndex);
+
+                while(condition)
+                {
+                    instances[length] = nextIndex;
+                    length += ONE;
+
+                    nextIndex = FindNextCharacter(c, nextIndex);
+                    condition = IsBoundry(nextIndex);
+                }
+            }
+
+            return instances;
+        }
+
+        /// <summary>
+        /// Takes a character array, and removes all blanks (NOT_EXIST)
+        /// </summary>
+        /// <param name="array">The array</param>
+        /// <returns>Trimmed array</returns>
+        public static char[] Trim(char[] array)
+        {
+            int length = array.Length;
+            int actualLength = ZERO;
+
+            foreach (char c in array)
+                if (c != NOT_EXIST)
+                    actualLength += ONE;
+
+            char[] trimmedArray = new char[actualLength];
+            for (int i = 0; i < length; i++)
+                if (array[i] != NOT_EXIST)
+                    trimmedArray[i] = array[i];
+
+            return trimmedArray;
+
+        }
+
+        /// <summary>
+        /// Takes a integer array, removes all ZERO's
+        /// </summary>
+        /// <param name="array">The array</param>
+        /// <returns>Trimmed array</returns>
+        public static int[] Trim(int[] array)
+        {
+            int length = array.Length;
+            int actualLength = ZERO;
+
+            foreach (int i in array)
+                if (i > 0)
+                    actualLength += ONE;
+
+            int[] trimmedArray = new int[actualLength];
+            for(int j = 0; j < length; j++)
+                if (array[j] > 0)
+                    trimmedArray[j] = array[j];
+
+            return trimmedArray;
+        }
+
         /*Pseudocode
          * Find the first character in the choosen word to search for.
          * 
@@ -816,8 +968,20 @@ namespace WordSearcher
         private static void Main(string[] args)
         {
             //Testing
+            char[] tests =
+            [
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+                'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+            ];
 
-            
+            //Test Passed
+            foreach(char test in tests)
+            {
+                int[] array = Trim(FindAllInstancesOfCharacter(test));
+                Print(test + COLON);
+                PrintArray(array);
+            }
+
             Console.WriteLine();
             Console.WriteLine("End Of Program?");
             Console.ReadKey(true);
