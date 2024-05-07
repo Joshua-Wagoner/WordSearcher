@@ -1,4 +1,7 @@
-﻿namespace WordSearcher
+﻿using System.Runtime.CompilerServices;
+using static WordSearcher.Program;
+
+namespace WordSearcher
 {
 
     /** *
@@ -71,6 +74,7 @@
         public readonly static string EOL_MESSAGE = "EOL";
         public readonly static string NEW_LINE = "\n";
         public readonly static string COLON = ":";
+        public readonly static string SPACE = string.Empty;
 
         public readonly static char ERROR = '!';
         public readonly static char NOT_EXIST = ' ';
@@ -205,20 +209,20 @@
         public static void Print(string s)
         => Console.Write(s);
 
-        public static void PrintArray(char[] array)
+        public static void PrintCharArray(char[] array)
         {
-            foreach (int i in array)
+            foreach (char i in array)
                 if (i != array[^ONE])
-                    Print(i + COLON);
+                    Print(i + SPACE);
                 else
                     Print(i + NEW_LINE);
         }
 
-        public static void PrintArray(int[] array)
+        public static void PrintIntArray(int[] array)
         {
             foreach (int i in array)
                 if (i != array[^ONE])
-                    Print(i + COLON);
+                    Print(i + SPACE);
                 else
                     Print(i + NEW_LINE);
         }
@@ -326,14 +330,24 @@
                 - (FlooredColumnRatio(index) * columns)
             );
 
+        //Direction Helpers
+        public static char CharAtIndex(int index)
+        => chars[ConvertToZeroBased(index)];
+
+        public static bool IsCharAtIndex(int index, char c)
+        => c == chars[ConvertToZeroBased(index)];
+
         //Direction Searches
+        private static int NorthOperation(int index)
+        => index - columns;
+
         /// <summary>
         /// Searches for a character in the North direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the north direction.</returns>
         private static char SearchNorth(int index)
-        => chars[index - columns];
+        => chars[NorthOperation(index)];
 
         /// <summary>
         /// Checks to see if the method exists before continuing to Search North.
@@ -345,13 +359,16 @@
         => CharacterExists(index - columns)
             ? SearchNorth(index) : NOT_EXIST;
 
+        private static int EastOperation(int index)
+        => index + ONE;
+
         /// <summary>
         /// Searches for a character in the East direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the East direction.</returns>
         private static char SearchEast(int index)
-        => chars[index + ONE];
+        => chars[EastOperation(index)];
 
         /// <summary>
         /// Checks to see if the method exists before continuing to Search East.
@@ -363,13 +380,16 @@
         => CharacterExists(index + ONE)
             ? SearchEast(index) : NOT_EXIST;
 
+        private static int SouthOperation(int index)
+        => index + columns;
+
         /// <summary>
         /// Searches for a character in the South direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the South direction.</returns>
         private static char SearchSouth(int index)
-        => chars[index + columns];
+        => chars[SouthOperation(index)];
 
         /// <summary>
         /// Checks to see if the method exists before continuing to Search North.
@@ -381,13 +401,16 @@
         => CharacterExists(index + columns)
             ? SearchSouth(index) : NOT_EXIST;
 
+        private static int WestOperation(int index)
+        => index - ONE;
+
         /// <summary>
         /// Searches for a character in the West direction.
         /// </summary>
         /// <param name="index">The Index of the character.(Integer)</param>
         /// <returns>Character in the West direction.</returns>
         private static char SearchWest(int index)
-        => chars[index - ONE];
+        => chars[WestOperation(index)];
 
         /// <summary>
         /// Checks to see if the method exists before continuing to Search North.
@@ -470,6 +493,20 @@
         private static char NorthWest(int index)
         => CharacterExists((index - ONE) - columns) 
             ? SearchNorthWest(index) : NOT_EXIST;
+
+        private static int GetIndexAtDirection(Directions direction, int start)
+        => direction switch
+        {
+            Directions.NORTH => NorthOperation(start),
+            Directions.NORTH_EAST => NorthOperation(EastOperation(start)),
+            Directions.EAST => EastOperation(start),
+            Directions.SOUTH_EAST => SouthOperation(EastOperation(start)),
+            Directions.SOUTH => SouthOperation(start),
+            Directions.SOUTH_WEST => SouthOperation(WestOperation(start)),
+            Directions.WEST => WestOperation(start),
+            Directions.NORTH_WEST => NorthOperation(WestOperation(start)),
+            _ => ZERO
+        };
 
         //Helpers
         /// <summary>
@@ -615,6 +652,20 @@
             return tempDirection;
         }
 
+        private static char GetSearchedCharacter(Directions direction, int index)
+        => direction switch
+        {
+            Directions.NORTH => North(index),
+            Directions.NORTH_EAST => NorthEast(index),
+            Directions.EAST => East(index),
+            Directions.SOUTH_EAST => SouthEast(index),
+            Directions.SOUTH => South(index),
+            Directions.SOUTH_WEST => SouthWest(index),
+            Directions.WEST => West(index),
+            Directions.NORTH_WEST => NorthWest(index),
+            _ => ERROR,
+        };
+
         /// <summary>
         /// Takes in a direction and character index and returns the wanted char.
         /// </summary>
@@ -622,42 +673,7 @@
         /// <param name="index">The Index of the Character.</param>
         /// <returns>The character in the specified direction.</returns>
         private static char Search(Directions direction, int index)
-        {
-            char tempChar = ERROR;
-
-            switch (direction)
-            {
-                case Directions.NORTH:
-                    tempChar = North(index);
-                    break;
-                case Directions.NORTH_EAST:
-                    tempChar = NorthEast(index);
-                    break;
-                case Directions.EAST:
-                    tempChar = East(index);
-                    break;
-                case Directions.SOUTH_EAST:
-                    tempChar = SouthEast(index);
-                    break;
-                case Directions.SOUTH:
-                    tempChar = South(index);
-                    break;
-                case Directions.SOUTH_WEST:
-                    tempChar = SouthWest(index);
-                    break;
-                case Directions.WEST:
-                    tempChar = West(index);
-                    break;
-                case Directions.NORTH_WEST:
-                    tempChar = NorthWest(index);
-                    break;
-                default:
-                    //Not a direction
-                    break;
-            }
-
-            return tempChar;
-        }
+        => GetSearchedCharacter(direction, index);
 
         /// <summary>
         /// Protects the Search method by first validating the search.
@@ -693,7 +709,8 @@
             //Search Directions
             for (int x = ZERO; x < NUM_DIRECTIONS; x++)
             {
-                chars[x] = ProtectedSearch(GetDirectionByInteger(ReverseZeroBased(x)), index);
+                chars[x] = ProtectedSearch(
+                    GetDirectionByInteger(ReverseZeroBased(x)), index);
             }
 
             return chars;
@@ -856,7 +873,7 @@
         /// <param name="index">The index</param>
         /// <returns>A Bool Value.</returns>
         public static bool IsBoundry(int index)
-        => index > ZERO && index < wordSearch.Length;
+        => index > ZERO && index <= wordSearch.Length;
 
         //Hurray for Recursion!
 
@@ -942,6 +959,128 @@
             return trimmedArray;
         }
 
+        public static int Break(string[] array)
+        => array.Length;
+
+        public static int Break(char[] array)
+        => array.Length;
+
+        public static int Break(int[] array)
+        => array.Length;
+
+        public static void RepeatC(int index,int[] instances, char[] results, char[] cWord, int j, int k)
+        {
+            for (int l = ZERO; l < Break(results); l++)
+            {
+                if (results[l] == cWord[j + ONE] && cWord[j] != cWord[^ONE])
+                {
+                    Directions direction = DIRECTIONS[l];
+                    index = GetIndexAtDirection(direction, instances[k]);
+                }
+                else
+                {
+                    l = Break(results);
+                }
+            }
+        }
+
+        public static void RepeatB(int index, int[] instances, char[] cWord, int j, int k)
+        {
+            char[] results;
+
+            index = instances[k];
+
+            results = DirectionalSearch(index);
+
+            RepeatC(index, instances, results, cWord, j, k);
+        }
+
+        public static void RepeatA(int index, char[] cWord, char c, int j)
+        {
+            int[] instances;
+
+            instances = Trim(FindAllInstancesOfCharacter(c));
+
+            for (int k = ZERO; k < Break(instances); k++)
+            {
+                RepeatB(index, instances, cWord, j, k);
+            }
+        }
+
+        public static void RepeatOne(int index, string word)
+        {
+            char c;
+            char[] cWord = word.ToCharArray();
+
+            for (int j = ZERO; j < Break(cWord); j++)
+            {
+                if (j == ZERO)
+                    c = cWord[ZERO];
+                else
+                {
+                    c = cWord[j];
+                }
+
+                RepeatA(index, cWord, c, j);
+            }
+        }
+
+        public static void Algorithm()
+        {
+            string word;
+            char[] cWord;
+            int index = ZERO;
+            char c;
+            int[] instances;
+            char[] results;
+            Directions direction;
+
+            for (int i = ZERO; i < Break(words); i++)
+            {
+                if (i == ZERO)
+                    word = words[ZERO];
+                else
+                {
+                    word = words[i];
+                }
+
+                RepeatOne(index, word);
+            }   
+                //cWord = word.ToCharArray();
+
+                //for(int j = ZERO; j < Break(cWord); j++)
+                //{
+                //    if(j == ZERO)
+                //        c = cWord[ZERO];
+                //    else
+                //    {
+                //        c = cWord[j];
+                //    }
+
+                //    instances = Trim(FindAllInstancesOfCharacter(c));
+
+                //    for(int k = ZERO; k < Break(instances); k++)
+                //    {
+                //        index = instances[k];
+
+                //        results = DirectionalSearch(index);
+
+                //        for(int l = ZERO; l < Break(results); l++)
+                //        {
+                //            if (results[l] == cWord[j + ONE] && cWord[j] != cWord[^ONE])
+                //            {
+                //                direction = DIRECTIONS[l];
+                //                index = GetIndexAtDirection(direction, instances[k]);
+                //            }
+                //            else
+                //            {
+                //                l = Break(results);
+                //            }
+                //        }
+                //    }
+                //}
+            
+        }
         /*Pseudocode
          * Find the first character in the choosen word to search for.
          * 
@@ -968,19 +1107,22 @@
         private static void Main(string[] args)
         {
             //Testing
-            char[] tests =
-            [
-                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
-            ];
-
-            //Test Passed
-            foreach(char test in tests)
+            int row = 12, col = 14;
+            int index = FindIndex(row, col);
+            char[] results = DirectionalSearch(index);
+            char target = 'l';
+            Directions direction = Directions.NONE;
+            
+            for(int i = 0; i < results.Length; i++)
             {
-                int[] array = Trim(FindAllInstancesOfCharacter(test));
-                Print(test + COLON);
-                PrintArray(array);
+                if (results[i] == target)
+                    direction = DIRECTIONS[i];
             }
+
+            Print(direction + NEW_LINE);
+            Print(GetIndexAtDirection(direction, index) + NEW_LINE);
+            Print(CharAtIndex(GetIndexAtDirection(direction, index)) + NEW_LINE);
+                
 
             Console.WriteLine();
             Console.WriteLine("End Of Program?");
