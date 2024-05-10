@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace WordSearcher
 {
 
@@ -1001,75 +1003,84 @@ namespace WordSearcher
             return found;
         }
 
+        private static int GetTargetCharIndexOfSearch(char[] results, char target)
+        {
+            int index = ZERO;
+
+            for(int i = 0; i < Break(results); i++)
+            {
+                if (results[i] == target) index = ReverseZeroBased(i);
+            }
+
+            return index;
+        }
+
+        private static bool WordFound(int index)
+        {
+            bool found = false;
+
+            string word = words[ConvertToZeroBased(index)];
+
+            char[] wordCharacters = word.ToCharArray();
+
+            char firstChar = wordCharacters[ConvertToZeroBased(ONE)];
+
+            char nextChar = wordCharacters[ONE];
+
+            int[] instances = Trim(FindAllInstancesOfCharacter(firstChar));
+
+            bool condition = false;
+
+            int incrementer = ZERO;
+
+            while (!condition && incrementer < instances.Length && !found)
+            {
+                incrementer += ONE;
+
+                int instance = instances[ConvertToZeroBased(incrementer)];
+
+                char[] search = DirectionalSearch(instance);
+
+                //Is there a second letter, if so, continue the search
+                condition = IsTargetCharFound(search, nextChar);
+
+                if (condition)
+                {
+                    Directions direction = DIRECTIONS[GetTargetCharIndexOfSearch(search, nextChar)];
+
+                    int indexer = instance;
+
+                    //If it uses the direction that was found, and completely finds the word, then return found as true.
+                    for (int i = ONE; i < wordCharacters.Length; i++)
+                    {
+                        if (i == wordCharacters.Length - ONE) //Just before it ends.
+                            if (ProtectedSearch(direction, indexer) == wordCharacters[i])
+                            {
+                                indexer = GetIndexAtDirection(direction, indexer);
+                                found = true;
+                            }
+
+                            else
+                                found = false;
+
+                        else
+                            if (ProtectedSearch(direction, index) == wordCharacters[^ONE])
+                                found = true;
+                    }
+                }
+
+            }
+
+            return found;
+        }
+
+
+
         private static void Main(string[] args)
         {
             //Testing
-
-            //Testing out the alogrithm step-by-step
-
-            //Done once 
-            //{
-            string word = words[ConvertToZeroBased(ONE)];
-            Print("Word: " + word + NEW_LINE);
-
-            char[] wordCharacters = word.ToCharArray();
-            Print("Characters: ");
-            PrintCharArray(wordCharacters);
-
-            char firstChar = wordCharacters[ConvertToZeroBased(ONE)];
-            Print("First Character: " + firstChar + NEW_LINE);
-
-            int[] instances = Trim(FindAllInstancesOfCharacter(firstChar));
-            Print("Instances: ");
-            PrintIntArray(instances);
-            
-
-            int firstInstance = instances[ZERO];
-            Print("First Instance: ");
-            Print(firstInstance + NEW_LINE);
-
-            char[] search = DirectionalSearch(firstInstance);
-            Print("Search Results: ");
-            PrintCharArray(search);
-
-            //}
-
-            char nextChar = wordCharacters[ConvertToZeroBased(ONE + ONE)];
-
-            bool conditionOne;
-
-            conditionOne = IsTargetCharFound(search, nextChar);
-
-            Print("Target Char is Found: ");
-            Print(conditionOne + NEW_LINE);
-
-            int increment = ZERO;
-            Print("Increment: " + increment + NEW_LINE);
-
-            while (!conditionOne)
-            {
-                increment += ONE;
-                Print("Increment: " + increment + NEW_LINE);
-
-                //Repeated until found
-                int nextInstance = instances[ZERO + increment];
-                Print("Next Instance: ");
-                Print(nextInstance + NEW_LINE);
-
-                search = DirectionalSearch(nextInstance);
-                Print("Search Results: ");
-                PrintCharArray(search);
-
-                conditionOne = IsTargetCharFound(search, nextChar);
-
-                Print("Target Char is Found: ");
-                Print(conditionOne + NEW_LINE);
-            }
-            if(conditionOne)
-            {
-                Print("Congratulations, you found the next letter." + NEW_LINE);
-                //Continue
-            }
+            Print(WordFound(ONE) + NEW_LINE);
+            PrintIntArray(Trim(FindAllInstancesOfCharacter('b')));
 
             
 
