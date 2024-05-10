@@ -1,11 +1,9 @@
-﻿using System.Runtime.CompilerServices;
-using static WordSearcher.Program;
-
+﻿
 namespace WordSearcher
 {
 
     /** *
-     * DLM: 05/06/2024 
+     * DLM: 05/10/2024 
      * Program Name: WordSearcher
      * Author: Joshua M. Wagoner
      * Copyright @ 2024 All Rights Reserved
@@ -74,7 +72,7 @@ namespace WordSearcher
         public readonly static string EOL_MESSAGE = "EOL";
         public readonly static string NEW_LINE = "\n";
         public readonly static string COLON = ":";
-        public readonly static string SPACE = string.Empty;
+        public readonly static string SPACE = " ";
 
         public readonly static char ERROR = '!';
         public readonly static char NOT_EXIST = ' ';
@@ -211,11 +209,11 @@ namespace WordSearcher
 
         public static void PrintCharArray(char[] array)
         {
-            foreach (char i in array)
-                if (i != array[^ONE])
-                    Print(i + SPACE);
+            for (int i = 0; i < array.Length; i++)
+                if (i != array.Length - ONE)
+                    Print(array[i] + SPACE);
                 else
-                    Print(i + NEW_LINE);
+                    Print(array[i] + NEW_LINE);
         }
 
         public static void PrintIntArray(int[] array)
@@ -968,119 +966,6 @@ namespace WordSearcher
         public static int Break(int[] array)
         => array.Length;
 
-        public static void RepeatC(int index,int[] instances, char[] results, char[] cWord, int j, int k)
-        {
-            for (int l = ZERO; l < Break(results); l++)
-            {
-                if (results[l] == cWord[j + ONE] && cWord[j] != cWord[^ONE])
-                {
-                    Directions direction = DIRECTIONS[l];
-                    index = GetIndexAtDirection(direction, instances[k]);
-                }
-                else
-                {
-                    l = Break(results);
-                }
-            }
-        }
-
-        public static void RepeatB(int index, int[] instances, char[] cWord, int j, int k)
-        {
-            char[] results;
-
-            index = instances[k];
-
-            results = DirectionalSearch(index);
-
-            RepeatC(index, instances, results, cWord, j, k);
-        }
-
-        public static void RepeatA(int index, char[] cWord, char c, int j)
-        {
-            int[] instances;
-
-            instances = Trim(FindAllInstancesOfCharacter(c));
-
-            for (int k = ZERO; k < Break(instances); k++)
-            {
-                RepeatB(index, instances, cWord, j, k);
-            }
-        }
-
-        public static void RepeatOne(int index, string word)
-        {
-            char c;
-            char[] cWord = word.ToCharArray();
-
-            for (int j = ZERO; j < Break(cWord); j++)
-            {
-                if (j == ZERO)
-                    c = cWord[ZERO];
-                else
-                {
-                    c = cWord[j];
-                }
-
-                RepeatA(index, cWord, c, j);
-            }
-        }
-
-        public static void Algorithm()
-        {
-            string word;
-            char[] cWord;
-            int index = ZERO;
-            char c;
-            int[] instances;
-            char[] results;
-            Directions direction;
-
-            for (int i = ZERO; i < Break(words); i++)
-            {
-                if (i == ZERO)
-                    word = words[ZERO];
-                else
-                {
-                    word = words[i];
-                }
-
-                RepeatOne(index, word);
-            }   
-                //cWord = word.ToCharArray();
-
-                //for(int j = ZERO; j < Break(cWord); j++)
-                //{
-                //    if(j == ZERO)
-                //        c = cWord[ZERO];
-                //    else
-                //    {
-                //        c = cWord[j];
-                //    }
-
-                //    instances = Trim(FindAllInstancesOfCharacter(c));
-
-                //    for(int k = ZERO; k < Break(instances); k++)
-                //    {
-                //        index = instances[k];
-
-                //        results = DirectionalSearch(index);
-
-                //        for(int l = ZERO; l < Break(results); l++)
-                //        {
-                //            if (results[l] == cWord[j + ONE] && cWord[j] != cWord[^ONE])
-                //            {
-                //                direction = DIRECTIONS[l];
-                //                index = GetIndexAtDirection(direction, instances[k]);
-                //            }
-                //            else
-                //            {
-                //                l = Break(results);
-                //            }
-                //        }
-                //    }
-                //}
-            
-        }
         /*Pseudocode
          * Find the first character in the choosen word to search for.
          * 
@@ -1104,25 +989,89 @@ namespace WordSearcher
          *
          */
 
+        private static bool IsTargetCharFound(char[] results, char target)
+        {
+            bool found = false;
+
+            for(int i = 0; i < Break(results); i++)
+            {
+                if (results[i] == target) found = true;
+            }
+
+            return found;
+        }
+
         private static void Main(string[] args)
         {
             //Testing
-            int row = 12, col = 14;
-            int index = FindIndex(row, col);
-            char[] results = DirectionalSearch(index);
-            char target = 'l';
-            Directions direction = Directions.NONE;
+
+            //Testing out the alogrithm step-by-step
+
+            //Done once 
+            //{
+            string word = words[ConvertToZeroBased(ONE)];
+            Print("Word: " + word + NEW_LINE);
+
+            char[] wordCharacters = word.ToCharArray();
+            Print("Characters: ");
+            PrintCharArray(wordCharacters);
+
+            char firstChar = wordCharacters[ConvertToZeroBased(ONE)];
+            Print("First Character: " + firstChar + NEW_LINE);
+
+            int[] instances = Trim(FindAllInstancesOfCharacter(firstChar));
+            Print("Instances: ");
+            PrintIntArray(instances);
             
-            for(int i = 0; i < results.Length; i++)
+
+            int firstInstance = instances[ZERO];
+            Print("First Instance: ");
+            Print(firstInstance + NEW_LINE);
+
+            char[] search = DirectionalSearch(firstInstance);
+            Print("Search Results: ");
+            PrintCharArray(search);
+
+            //}
+
+            char nextChar = wordCharacters[ConvertToZeroBased(ONE + ONE)];
+
+            bool conditionOne;
+
+            conditionOne = IsTargetCharFound(search, nextChar);
+
+            Print("Target Char is Found: ");
+            Print(conditionOne + NEW_LINE);
+
+            int increment = ZERO;
+            Print("Increment: " + increment + NEW_LINE);
+
+            while (!conditionOne)
             {
-                if (results[i] == target)
-                    direction = DIRECTIONS[i];
+                increment += ONE;
+                Print("Increment: " + increment + NEW_LINE);
+
+                //Repeated until found
+                int nextInstance = instances[ZERO + increment];
+                Print("Next Instance: ");
+                Print(nextInstance + NEW_LINE);
+
+                search = DirectionalSearch(nextInstance);
+                Print("Search Results: ");
+                PrintCharArray(search);
+
+                conditionOne = IsTargetCharFound(search, nextChar);
+
+                Print("Target Char is Found: ");
+                Print(conditionOne + NEW_LINE);
+            }
+            if(conditionOne)
+            {
+                Print("Congratulations, you found the next letter." + NEW_LINE);
+                //Continue
             }
 
-            Print(direction + NEW_LINE);
-            Print(GetIndexAtDirection(direction, index) + NEW_LINE);
-            Print(CharAtIndex(GetIndexAtDirection(direction, index)) + NEW_LINE);
-                
+            
 
             Console.WriteLine();
             Console.WriteLine("End Of Program?");
