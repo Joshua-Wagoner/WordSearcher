@@ -1,54 +1,24 @@
-﻿
-using System;
-
-namespace WordSearcher
+﻿namespace WordSearcher
 {
 
     /** *
      * DLM: 05/10/2024 
+     * Date Finished: 05/10/2024 @ 4:12PM PST
      * Program Name: WordSearcher
      * Author: Joshua M. Wagoner
      * Copyright @ 2024 All Rights Reserved
      * 
      * Description:
      * This program will take a designated word search, a list of words,
-     * and search the word search until all words are found.
+     * and search the word search. It will let the user know what rows and columns
+     * all the words are at.
      * 
-     */
-
-    /*
-     * TODO:
-     *  Finished: Yes
-     *  Clean and Simplify
-     *  
-     *  Finsihed: Yes
-     *  Simplfy the Directional Criterias
-     *  
-     *  Finished: Yes
-     *  Finish writing the boundary method.
-     *  
-     *  Finished: Yes
-     *  Finishing writing the Find Row method & Find Column method.
-     *  Also finish all the helpers.
+     * Notes:
+     * Project finished, Praise the Lord.
+     * Without the Lord as my Core, this wouldn't have been possible.
+     * He is first, the center, and the reason.
+     * Praise Him forever and ever. Amen.
      * 
-     *  Finished: Yes
-     *  Write method checkers.
-     *  
-     *  Finished: Yes
-     *  Finish implementing the new method checkers into the directional searches.
-     *  
-     *  Finished: Yes
-     *  Finish implementing the final searching methods, and the public directional search
-     *  that will use the new Protected Search Method.
-     *  
-     *  Finished: No
-     *  Finish the algorithm.
-     *  
-     *  Finished: No
-     *  Test the algorithm.
-     *  
-     *  Finished: No
-     *  Finalize everything.
      */
 
     internal class Program
@@ -114,7 +84,7 @@ namespace WordSearcher
         public readonly static int WORD_CHARACTER_LENGTH = 12;
         public readonly static int WORD_CHARACTER_ROWS = 7;
         public readonly static int WORDS_A_ROW = 5;
-        public readonly static int OVERALL_ROW_LENGTH = 
+        public readonly static int OVERALL_ROW_LENGTH =
             WORDS_A_ROW * WORD_CHARACTER_LENGTH;
 
         public readonly static int ZERO = 0;
@@ -146,11 +116,11 @@ namespace WordSearcher
         public readonly static Directions[,] DIRECTIONS_CRITERIA =
         {
             //North Criteria
-            {Directions.EAST, Directions.SOUTH_EAST, Directions.SOUTH, 
+            {Directions.EAST, Directions.SOUTH_EAST, Directions.SOUTH,
                 Directions.SOUTH_WEST, Directions.WEST},
 
             //East Criteria
-            {Directions.NORTH, Directions.SOUTH, Directions.SOUTH_WEST, 
+            {Directions.NORTH, Directions.SOUTH, Directions.SOUTH_WEST,
                 Directions.WEST, Directions.NORTH_WEST},
 
             //South Criteria
@@ -175,7 +145,7 @@ namespace WordSearcher
             "january     ", "longjohns   ", "mitts       ", "scarf       ",
             "shovel      ", "skating     ", "skiing      ", "sleigh      ",
             "slippery    ", "snowballs   ", "snowboarding", "snowflakes  ",
-            "snowman     ", "showshoes   ", "solstice    ", "sweater     ",
+            "snowman     ", "snowshoes   ", "solstice    ", "sweater     ",
             "toboggan    ", "whiteout    ", "wintertime  "
         ];
         private readonly static string wordSearch =
@@ -220,11 +190,11 @@ namespace WordSearcher
 
         public static void PrintIntArray(int[] array)
         {
-            foreach (int i in array)
-                if (i != array[^ONE])
-                    Print(i + SPACE);
+            for (int i = 0; i < array.Length; i++)
+                if (i != array.Length - ONE)
+                    Print(array[i] + SPACE);
                 else
-                    Print(i + NEW_LINE);
+                    Print(array[i] + NEW_LINE);
         }
 
         //Find Helpers
@@ -266,7 +236,7 @@ namespace WordSearcher
 
         private static double RowMax(double index)
         => RowMin(index) + ONE;
-        
+
         /// <summary>
         /// This method is a helper method for the Finder methods.
         /// It takes the index and divides it by the columns to get the column min.
@@ -299,9 +269,9 @@ namespace WordSearcher
         => (int)Math.Round
             (
                 (
-                    (ColumnMax(index) / ONE) 
+                    (ColumnMax(index) / ONE)
                     - ColumnRatio(index)
-                ) 
+                )
                 + FlooredColumnRatio(index)
             );
 
@@ -321,12 +291,12 @@ namespace WordSearcher
                             (
                                 (RowMax(index) / ONE)
                                 - RowRatio(index)
-                            ) 
+                            )
                             - ONE
-                        ) 
+                        )
                         * columns
                     )
-                ) 
+                )
                 - (FlooredColumnRatio(index) * columns)
             );
 
@@ -419,7 +389,7 @@ namespace WordSearcher
         /// <param name="index">The Index</param>
         /// <returns>Character at Index</returns>
         public static char West(int index)
-        => CharacterExists(index - ONE) 
+        => CharacterExists(index - ONE)
             ? SearchWest(index) : NOT_EXIST;
 
         /// <summary>
@@ -455,7 +425,7 @@ namespace WordSearcher
         /// <param name="index">The Index</param>
         /// <returns>Character at Index</returns>
         private static char SouthEast(int index)
-        => CharacterExists(index + ONE) 
+        => CharacterExists(index + ONE)
             ? SearchSouthEast(index) : NOT_EXIST;
 
         /// <summary>
@@ -491,7 +461,7 @@ namespace WordSearcher
         /// <param name="index">The Index</param>
         /// <returns>Character at Index</returns>
         private static char NorthWest(int index)
-        => CharacterExists((index - ONE) - columns) 
+        => CharacterExists((index - ONE) - columns)
             ? SearchNorthWest(index) : NOT_EXIST;
 
         private static int GetIndexAtDirection(Directions direction, int start)
@@ -622,7 +592,7 @@ namespace WordSearcher
         {
             Directions tempDirection = Directions.NORTH;
 
-            switch(integer)
+            switch (integer)
             {
                 case 1:
                     tempDirection = Directions.NORTH;
@@ -647,7 +617,7 @@ namespace WordSearcher
                     break;
                 case 8:
                     tempDirection = Directions.NORTH_WEST;
-                    break;       
+                    break;
             }
             return tempDirection;
         }
@@ -696,7 +666,7 @@ namespace WordSearcher
             }
             else
                 return ERROR;
-                
+
         }
         /// <summary>
         /// Searches all eight directions.
@@ -735,8 +705,6 @@ namespace WordSearcher
         /// <returns>A Boolean</returns>
         public static bool CharacterExists(int index)
         => index >= ZERO && index <= characters;
-
-        //Direction and Placement Checkers
 
         /// <summary>
         /// Checks the index to see if its at the West Wall.
@@ -818,9 +786,6 @@ namespace WordSearcher
         public static bool IsSouthEastCorner(int index)
         => IsSouthPole(index) && IsEastWall(index);
 
-
-        //Algorithm
-
         /// <summary>
         /// This method takes in a character and returns the first index
         /// of its kind.
@@ -831,7 +796,7 @@ namespace WordSearcher
         {
             int index = ZERO;
 
-            for(int i = ZERO; i < wordSearch.Length; i++)
+            for (int i = ZERO; i < wordSearch.Length; i++)
             {
                 if (wordSearch[i] == c)
                 {
@@ -875,8 +840,6 @@ namespace WordSearcher
         public static bool IsBoundry(int index)
         => index > ZERO && index <= wordSearch.Length;
 
-        //Hurray for Recursion!
-
         /// <summary>
         /// This method combines the first two Find Character Methods.
         /// It uses recursion to find all instances of a letter, if any.
@@ -901,7 +864,7 @@ namespace WordSearcher
                 nextIndex = FindNextCharacter(c, startingIndex);
                 condition = IsBoundry(nextIndex);
 
-                while(condition)
+                while (condition)
                 {
                     instances[length] = nextIndex;
                     length += ONE;
@@ -929,9 +892,13 @@ namespace WordSearcher
                     actualLength += ONE;
 
             char[] trimmedArray = new char[actualLength];
+            int counter = 0;
             for (int i = 0; i < length; i++)
                 if (array[i] != NOT_EXIST)
-                    trimmedArray[i] = array[i];
+                {
+                    trimmedArray[counter] = array[i];
+                    counter += ONE;
+                }
 
             return trimmedArray;
 
@@ -952,9 +919,14 @@ namespace WordSearcher
                     actualLength += ONE;
 
             int[] trimmedArray = new int[actualLength];
-            for(int j = 0; j < length; j++)
+            int counter = 0;
+            for (int j = 0; j < length; j++)
                 if (array[j] > 0)
-                    trimmedArray[j] = array[j];
+                {
+                    trimmedArray[counter] = array[j];
+                    counter += ONE;
+                }
+
 
             return trimmedArray;
         }
@@ -968,62 +940,68 @@ namespace WordSearcher
         public static int Break(int[] array)
         => array.Length;
 
-        /*Pseudocode
-         * Find the first character in the choosen word to search for.
-         * 
-         * Find first iteration, if any, inside the character array.
-         * 
-         * Find the next letter in the choosen word with the same directional
-         * method.
-         * 
-         * Repeat until either the entire word has been found.
-         * 
-         * If the next letter found isn't a corresponding character in the word
-         * that is being searched, cancel the process and move onto the next
-         * iteration, if any, in the word search.
-         * 
-         * Else if the next letter is a corresponding character in the word using
-         * the same directional method used, continue until either found or the 
-         * first condtion is met.
-         * 
-         * If all else fails, that means that either a letter wasn't found, word
-         * couldn't be found, or something else.
-         *
-         */
-
         private static bool IsTargetCharFound(char[] results, char target)
         {
             bool found = false;
 
-            for(int i = 0; i < Break(results); i++)
+            for (int i = 0; i < Break(results); i++)
             {
                 if (results[i] == target) found = true;
             }
 
             return found;
         }
+        private static bool IsMoreThanOneSolution(char[] results, char target)
+        {
+            bool value = false;
 
+            for (int i = 0; i < Break(results); i++)
+            {
+                if (results[i] == target)
+                {
+                    for (int j = i; j < Break(results); j++)
+                        if (results[j] == target) value = true;
+                }
+            }
+
+            return value;
+        }
+        private static int[] GetIndexesForMoreThanOneSolution(char[] results, char target)
+        {
+            int[] indexes = new int[NUM_DIRECTIONS];
+
+            for (int i = 0; i < Break(results); i++)
+            {
+                if (results[i] == target)
+                {
+                    indexes[i] = ReverseZeroBased(i);
+                }
+            }
+
+            return indexes;
+        }
         private static int GetTargetCharIndexOfSearch(char[] results, char target)
         {
             int index = ZERO;
 
-            for(int i = 0; i < Break(results); i++)
+            for (int i = 0; i < Break(results); i++)
             {
                 if (results[i] == target) index = ReverseZeroBased(i);
             }
 
             return index;
         }
-
-        private static bool WordFound(int index)
+        private static int[] GetIndexesOfWord(string word)
         {
             bool found = false;
 
-            string word = words[ConvertToZeroBased(index)];
+            char[] wordCharacters = Trim(word.ToCharArray());
 
-            char[] wordCharacters = word.ToCharArray();
+            int[] indexs = new int[wordCharacters.Length];
 
             char firstChar = wordCharacters[ConvertToZeroBased(ONE)];
+
+            char lastChar = wordCharacters[^ONE];
 
             char nextChar = wordCharacters[ONE];
 
@@ -1041,51 +1019,211 @@ namespace WordSearcher
 
                 char[] search = DirectionalSearch(instance);
 
-                //Is there a second letter, if so, continue the search
                 condition = IsTargetCharFound(search, nextChar);
 
-                if (condition)
+                if (condition && IsMoreThanOneSolution(search, nextChar))
                 {
-                    Directions direction = DIRECTIONS[GetTargetCharIndexOfSearch(search, nextChar)];
+                    int[] indexes = Trim(GetIndexesForMoreThanOneSolution(search, nextChar));
 
-                    int indexer = instance;
+                    Directions[] directions = new Directions[indexes.Length];
 
-                    //If it uses the direction that was found, and completely finds the word, then return found as true.
-                    for (int i = ONE; i < wordCharacters.Length; i++)
+                    for (int x = 0; x < indexes.Length; x++)
                     {
-                        if (i == wordCharacters.Length - ONE) //Just before it ends.
-                            if (ProtectedSearch(direction, indexer) == wordCharacters[i])
+                        directions[x] = DIRECTIONS[ConvertToZeroBased(indexes[x])];
+
+                        int indexer = instance;
+
+                        indexs[ZERO] = indexer;
+
+                        for (int i = ONE; i < Break(wordCharacters); i++)
+                        {
+                            if (i != wordCharacters.Length - ONE)
                             {
-                                indexer = GetIndexAtDirection(direction, indexer);
-                                found = true;
+                                if (ProtectedSearch(directions[x], indexer) == wordCharacters[i])
+                                {
+
+                                    indexer = GetIndexAtDirection(directions[x], indexer);
+                                    indexs[i] = indexer;
+                                }
+                                else
+                                {
+                                    found = false;
+                                    condition = false;
+                                    i = wordCharacters.Length;
+                                }
                             }
-
-                            else
-                                found = false;
-
-                        else
-                            if (ProtectedSearch(direction, index) == wordCharacters[^ONE])
+                            else if (ProtectedSearch(directions[x], indexer) == lastChar
+                                && i == wordCharacters.Length - ONE)
+                            {
+                                indexer = GetIndexAtDirection(directions[x], indexer);
+                                indexs[^ONE] = indexer;
                                 found = true;
+                                i = Break(wordCharacters);
+                                x = Break(indexes);
+                            }
+                        }
                     }
                 }
 
+                else if (condition)
+                {
+                    Directions direction =
+                        DIRECTIONS[ConvertToZeroBased(GetTargetCharIndexOfSearch(search, nextChar))];
+
+                    int indexer = instance;
+
+                    indexs[ZERO] = indexer;
+
+                    for (int i = ONE; i < Break(wordCharacters); i++)
+                    {
+                        if (i != wordCharacters.Length - ONE)
+                        {
+                            if (ProtectedSearch(direction, indexer) == wordCharacters[i])
+                            {
+                                indexer = GetIndexAtDirection(direction, indexer);
+                                indexs[i] = indexer;
+                            }
+                            else
+                            {
+                                found = false;
+                                condition = false;
+                                i = wordCharacters.Length;
+                            }
+                        }
+                        else if (ProtectedSearch(direction, indexer) == lastChar
+                            && i == wordCharacters.Length - ONE)
+                        {
+                            indexer = GetIndexAtDirection(direction, indexer);
+                            indexs[^ONE] = indexer;
+                            found = true;
+                            i = Break(wordCharacters);
+                        }
+                    }
+                }
+            }
+
+            return indexs;
+        }
+        private static bool IsWordPresent(string word)
+        {
+            bool found = false;
+
+            char[] wordCharacters = Trim(word.ToCharArray());
+
+            char firstChar = wordCharacters[ConvertToZeroBased(ONE)];
+
+            char lastChar = wordCharacters[^ONE];
+
+            char nextChar = wordCharacters[ONE];
+
+            int[] instances = Trim(FindAllInstancesOfCharacter(firstChar));
+
+            bool condition = false;
+
+            int incrementer = ZERO;
+
+            while (!condition && incrementer < instances.Length && !found)
+            {
+                incrementer += ONE;
+
+                int instance = instances[ConvertToZeroBased(incrementer)];
+
+                char[] search = DirectionalSearch(instance);
+
+                condition = IsTargetCharFound(search, nextChar);
+
+                if(condition && IsMoreThanOneSolution(search, nextChar))
+                {
+                    int[] indexes = Trim(GetIndexesForMoreThanOneSolution(search, nextChar));
+
+                    Directions[] directions = new Directions[indexes.Length];
+
+                    for (int x = 0; x < indexes.Length; x++)
+                    {
+                        directions[x] = DIRECTIONS[ConvertToZeroBased(indexes[x])];
+
+                        int indexer = instance;
+
+                        for (int i = ONE; i < Break(wordCharacters); i++)
+                        {
+                            if (i != wordCharacters.Length - ONE)
+                            {
+                                if (ProtectedSearch(directions[x], indexer) == wordCharacters[i])
+                                {
+                                    indexer = GetIndexAtDirection(directions[x], indexer);
+                                }
+                                else
+                                {
+                                    found = false;
+                                    condition = false;
+                                    i = wordCharacters.Length;
+                                }
+                            }
+                            else if (ProtectedSearch(directions[x], indexer) == lastChar
+                                && i == wordCharacters.Length - ONE)
+                            {
+                                found = true;
+                                i = Break(wordCharacters);
+                                x = Break(indexes);
+                            }
+                        }
+                    }
+                }
+
+                else if (condition)
+                {
+                    Directions direction = 
+                        DIRECTIONS[ConvertToZeroBased(GetTargetCharIndexOfSearch(search, nextChar))];
+
+                    int indexer = instance;
+
+                    for (int i = ONE; i < Break(wordCharacters); i++)
+                    {
+                        if (i != wordCharacters.Length - ONE)
+                        {
+                            if (ProtectedSearch(direction, indexer) == wordCharacters[i])
+                            {
+                                indexer = GetIndexAtDirection(direction, indexer);
+                            }
+                            else
+                            {
+                                found = false;
+                                condition = false;
+                                i = wordCharacters.Length;
+                            }
+                        }
+                        else if (ProtectedSearch(direction, indexer) == lastChar 
+                            && i == wordCharacters.Length - ONE)
+                        {
+                            found = true;
+                            i = Break(wordCharacters);
+                        }
+                    }
+                }
             }
 
             return found;
         }
-
-
-
         private static void Main(string[] args)
         {
-            //Testing
-            Print(WordFound(ONE) + NEW_LINE);
-            PrintIntArray(Trim(FindAllInstancesOfCharacter('b')));
+            //Works as described
+            foreach(string word in words)
+            {
+                if (IsWordPresent(word)) 
+                {
+                    Print("Word: " + word + NEW_LINE);
+                    Print("Exists: True" + NEW_LINE);
 
-            
+                    foreach (int index in GetIndexesOfWord(word))
+                        Print("Row: " + FindRow(index)
+                            + "\tColumn: " + FindColumn(index)
+                            + " => " + CharAtIndex(index) + NEW_LINE);
+                }
+                Print(NEW_LINE);
+                
+            }
 
-            Console.WriteLine();
-            Console.WriteLine("End Of Program?");
+            Console.WriteLine(EOL_MESSAGE);
             Console.ReadKey(true);
         }
 
